@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from flask import Flask, jsonify
 
@@ -26,6 +27,25 @@ def _rate_limit_rule(max_requests: int, window_seconds: int) -> str:
         return f"{max_requests} per {minutes} {unit}"
     unit = "second" if window_seconds == 1 else "seconds"
     return f"{max_requests} per {window_seconds} {unit}"
+
+
+def _create_all_with_lock(app: Flask) -> None:
+    with app.app_context():
+        if os.name != "posix":
+            db.create_all()
+            return
+
+        lock_path = Path(app.root_path).parent / "data" / ".schema.lock"
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with lock_path.open("w", encoding="utf-8") as lock_file:
+            import fcntl
+
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                db.create_all()
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
 def create_app(config_name: str | None = None) -> Flask:
@@ -83,7 +103,6 @@ def create_app(config_name: str | None = None) -> Flask:
 
     register_error_handlers(app)
 
-    with app.app_context():
-        db.create_all()
+    _create_all_with_lock(app)
 
     return app
