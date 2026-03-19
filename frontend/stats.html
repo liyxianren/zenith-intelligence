@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Intelligence (极智学习) - 学习统计</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .stats-header {
+            margin-bottom: 30px;
+        }
+
+        .stats-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .overview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .overview-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .overview-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .overview-change {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .change-up {
+            color: #4CAF50;
+        }
+
+        .change-down {
+            color: #f44336;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        .ranking-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .ranking-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .ranking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .ranking-item {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 12px;
+        }
+
+        .ranking-rank {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .ranking-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .ranking-percentile {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .heatmap-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .heatmap-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .heatmap-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+
+        .heatmap-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background: #ebedf0;
+        }
+
+        .heatmap-level-1 {
+            background: #c6e48b;
+        }
+
+        .heatmap-level-2 {
+            background: #7bc96f;
+        }
+
+        .heatmap-level-3 {
+            background: #239a3b;
+        }
+
+        .heatmap-level-4 {
+            background: #196127;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #666;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-link:hover {
+            background: #f5f5f5;
+        }
+
+        .nav-link.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stats-container">
+        <!-- 导航菜单 -->
+        <nav class="nav-menu">
+            <div class="nav-container">
+                <a href="app.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 18" />
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 6" />
+                        <path d="M3 12h18" />
+                    </svg>
+                    智能解题
+                </a>
+                <a href="courses.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                    课程中心
+                </a>
+                <a href="programming.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6" />
+                        <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                    编程助手
+                </a>
+                <a href="stats.html" class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    学习统计
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    个人中心
+                </a>
+            </div>
+        </nav>
+
+        <div class="stats-header">
+            <h1 class="stats-title">学习统计</h1>
+        </div>
+
+        <div class="overview-cards" id="overview-cards">
+            <!-- 概览卡片将在这里动态生成 -->
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">每日学习时长</div>
+                <div class="chart-container">
+                    <canvas id="daily-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">题目数量趋势</div>
+                <div class="chart-container">
+                    <canvas id="problems-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">学科分布</div>
+                <div class="chart-container">
+                    <canvas id="subjects-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">难度分布</div>
+                <div class="chart-container">
+                    <canvas id="difficulty-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <h2 class="ranking-title">我的排名</h2>
+            <div class="ranking-grid" id="ranking-grid">
+                <!-- 排名将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="heatmap-section">
+            <h2 class="heatmap-title">学习活动热力图</h2>
+            <div class="heatmap-grid" id="heatmap-grid">
+                <!-- 热力图将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/user.js"></script>
+    <script>
+        const StatsApp = {
+            overview: null,
+            dailyData: [],
+            subjectsData: [],
+            difficultyData: [],
+            ranking: null,
+            heatmap: null,
+            charts: {},
+
+            async init() {
+                await Promise.all([
+                    this.loadOverview(),
+                    this.loadDailyStats(),
+                    this.loadSubjectsStats(),
+                    this.loadDifficultyStats(),
+                    this.loadRanking(),
+                    this.loadHeatmap()
+                ]);
+            },
+
+            async loadOverview() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/overview', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.overview = result.data;
+                        this.renderOverview();
+                    }
+                } catch (error) {
+                    console.error('加载概览失败:', error);
+                }
+            },
+
+            async loadDailyStats() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/daily?days=30', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.dailyData = result.data;
+                        this.renderDailyCharts();
+                    }
+                } catch (error) {
+                    console.error('加载每日统计失败:', error);
+                }
+            },
+
+            async loadSubjectsStats() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/subjects', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.subjectsData = result.data;
+                        this.renderSubjectsChart();
+                    }
+                } catch (error) {
+                    console.error('加载学科统计失败:', error);
+                }
+            },
+
+            async loadDifficultyStats() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/difficulty', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.difficultyData = result.data;
+                        this.renderDifficultyChart();
+                    }
+                } catch (error) {
+                    console.error('加载难度统计失败:', error);
+                }
+            },
+
+            async loadRanking() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/ranking', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.ranking = result.data;
+                        this.renderRanking();
+                    }
+                } catch (error) {
+                    console.error('加载排名失败:', error);
+                }
+            },
+
+            async loadHeatmap() {
+                try {
+                    const response = await UserManager.fetchApi('/api/stats/heatmap', { headers: UserManager.getHeaders() });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.heatmap = result.data;
+                        this.renderHeatmap();
+                    }
+                } catch (error) {
+                    console.error('加载热力图失败:', error);
+                }
+            },
+
+            renderOverview() {
+                const container = document.getElementById('overview-cards');
+                const data = this.overview;
+
+                container.innerHTML = `
+                    <div class="overview-card">
+                        <div class="overview-value">${data.level}</div>
+                        <div class="overview-label">当前等级</div>
+                        <span class="level-badge">${data.levelTitle}</span>
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-value">${data.totalProblems}</div>
+                        <div class="overview-label">总题目数</div>
+                        <div class="overview-change change-up">本周 +${data.recentProblems}</div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-value">${data.accuracyRate}%</div>
+                        <div class="overview-label">正确率</div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-value">${data.streakDays}</div>
+                        <div class="overview-label">连续学习天数</div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-value">${Math.floor(data.totalStudyTime / 60)}h</div>
+                        <div class="overview-label">总学习时长</div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-value">${data.experience}</div>
+                        <div class="overview-label">经验值</div>
+                        <div class="overview-change">下一级需要 ${data.nextLevelExp}</div>
+                    </div>
+                `;
+            },
+
+            renderDailyCharts() {
+                const labels = this.dailyData.map(d => d.date.slice(5));
+                const studyTimeData = this.dailyData.map(d => d.studyTime);
+                const problemsData = this.dailyData.map(d => d.problemsCount);
+
+                this.charts.daily = new Chart(document.getElementById('daily-chart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '学习时长(分钟)',
+                            data: studyTimeData,
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                this.charts.problems = new Chart(document.getElementById('problems-chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '题目数',
+                            data: problemsData,
+                            backgroundColor: '#2196F3'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            },
+
+            renderSubjectsChart() {
+                if (this.subjectsData.length === 0) return;
+
+                this.charts.subjects = new Chart(document.getElementById('subjects-chart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: this.subjectsData.map(s => s.subject),
+                        datasets: [{
+                            data: this.subjectsData.map(s => s.totalProblems),
+                            backgroundColor: [
+                                '#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderDifficultyChart() {
+                if (this.difficultyData.length === 0) return;
+
+                this.charts.difficulty = new Chart(document.getElementById('difficulty-chart'), {
+                    type: 'pie',
+                    data: {
+                        labels: this.difficultyData.map(d => d.label),
+                        datasets: [{
+                            data: this.difficultyData.map(d => d.totalProblems),
+                            backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#9E9E9E']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderRanking() {
+                const container = document.getElementById('ranking-grid');
+                const data = this.ranking;
+
+                container.innerHTML = `
+                    <div class="ranking-item">
+                        <div class="ranking-rank">#${data.levelRank}</div>
+                        <div class="ranking-label">等级排名</div>
+                        <div class="ranking-percentile">超过 ${data.percentiles.level}% 的用户</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="ranking-rank">#${data.problemsRank}</div>
+                        <div class="ranking-label">题目数排名</div>
+                        <div class="ranking-percentile">超过 ${data.percentiles.problems}% 的用户</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="ranking-rank">#${data.streakRank}</div>
+                        <div class="ranking-label">连续学习排名</div>
+                        <div class="ranking-percentile">超过 ${data.percentiles.streak}% 的用户</div>
+                    </div>
+                    <div class="ranking-item">
+                        <div class="ranking-rank">${data.totalUsers}</div>
+                        <div class="ranking-label">总用户数</div>
+                    </div>
+                `;
+            },
+
+            renderHeatmap() {
+                const container = document.getElementById('heatmap-grid');
+                const cells = [];
+
+                for (let i = 0; i < 365; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (364 - i));
+                    const dateStr = date.toISOString().slice(0, 10);
+                    const count = this.heatmap[dateStr] || 0;
+
+                    let level = 0;
+                    if (count > 0) level = 1;
+                    if (count >= 3) level = 2;
+                    if (count >= 5) level = 3;
+                    if (count >= 10) level = 4;
+
+                    cells.push(`<div class="heatmap-cell heatmap-level-${level}" title="${dateStr}: ${count} 题"></div>`);
+                }
+
+                container.innerHTML = cells.join('');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            StatsApp.init();
+        });
+    </script>
+</body>
+
+</html>

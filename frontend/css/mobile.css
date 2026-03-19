@@ -1,0 +1,407 @@
+/* 移动端适配样式 */
+
+/* 响应式断点 */
+/* 手机: 320px - 480px */
+/* 平板: 481px - 768px */
+/* 桌面: 769px+ */
+
+/* 通用移动端样式 */
+@media screen and (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    /* 导航栏适配 */
+    .nav-links {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .nav-link {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    /* 卡片网格适配 */
+    .overview-cards,
+    .stats-cards,
+    .courses-grid,
+    .points-grid,
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 按钮适配 */
+    .btn,
+    .action-btn,
+    .submit-btn,
+    .start-btn,
+    .save-btn,
+    .logout-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    /* 表单适配 */
+    .form-input,
+    .form-textarea,
+    .search-input,
+    .language-select {
+        font-size: 16px;
+    }
+    
+    /* 模态框适配 */
+    .modal,
+    .course-detail-content,
+    .course-detail {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    /* 标题适配 */
+    h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 20px;
+    }
+    
+    h3 {
+        font-size: 18px;
+    }
+}
+
+/* 小屏幕手机适配 */
+@media screen and (max-width: 480px) {
+    body {
+        font-size: 13px;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-link {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .header,
+    .courses-header,
+    .programming-header,
+    .stats-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .filter-box {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+    
+    /* 隐藏次要元素 */
+    .sidebar {
+        display: none;
+    }
+    
+    /* 卡片内容简化 */
+    .card-content,
+    .course-content,
+    .point-card {
+        padding: 15px;
+    }
+    
+    .card-title,
+    .course-name,
+    .point-name {
+        font-size: 16px;
+    }
+    
+    .card-description,
+    .course-description,
+    .point-description {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+    
+    /* 按钮组适配 */
+    .panel-actions,
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .action-btn {
+        width: 100%;
+    }
+    
+    /* 表格适配 */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* 图表适配 */
+    .chart-container {
+        height: 200px;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 平板适配 */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .nav-links {
+        flex-wrap: wrap;
+    }
+    
+    .overview-cards,
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .courses-grid,
+    .points-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    /* 增大点击区域 */
+    .btn,
+    .action-btn,
+    .nav-link,
+    .card,
+    .course-card,
+    .point-card,
+    .achievement-item {
+        min-height: 44px;
+    }
+    
+    /* 移除悬停效果 */
+    .btn:hover,
+    .action-btn:hover,
+    .nav-link:hover,
+    .card:hover,
+    .course-card:hover,
+    .point-card:hover {
+        transform: none;
+        box-shadow: inherit;
+    }
+    
+    /* 激活状态替代悬停 */
+    .btn:active,
+    .action-btn:active,
+    .nav-link:active {
+        opacity: 0.8;
+    }
+}
+
+/* 横屏手机适配 */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .header,
+    .courses-header,
+    .programming-header,
+    .stats-header {
+        padding: 10px 15px;
+    }
+    
+    .nav-links {
+        margin-bottom: 10px;
+    }
+    
+    .main-content {
+        padding-top: 10px;
+    }
+}
+
+/* 高分辨率屏幕适配 */
+@media screen and (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .overview-cards,
+    .stats-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .courses-grid,
+    .points-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .nav-links,
+    .action-buttons,
+    .btn,
+    .search-box,
+    .filter-box {
+        display: none;
+    }
+    
+    body {
+        font-size: 12pt;
+    }
+    
+    .card,
+    .course-card,
+    .point-card {
+        break-inside: avoid;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    /* 如果需要支持深色模式，可以在这里添加样式 */
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 移动端特定组件样式 */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+    .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* 移动端底部导航 */
+    .mobile-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: 1px solid #eee;
+        padding: 10px 0;
+        z-index: 999;
+    }
+    
+    .mobile-nav.active {
+        display: flex;
+        justify-content: space-around;
+    }
+    
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: #666;
+        text-decoration: none;
+        font-size: 12px;
+    }
+    
+    .mobile-nav-item.active {
+        color: #4CAF50;
+    }
+    
+    .mobile-nav-icon {
+        font-size: 20px;
+    }
+}
+
+/* 移动端加载优化 */
+.mobile-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mobileLoading::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4CAF50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 移动端提示框 */
+.mobileToast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 2000;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}

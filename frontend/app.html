@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zenith Intelligence (极智学习) - 智能解题，拍照或输入题目即可获得详细解答">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#1E40AF">
+    <title>Zenith Intelligence (极智学习) - 智能解题</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('ai_learning_assistant_token')) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+    <style>
+        /* 现代设计增强样式 */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 10% 20%, rgba(96, 165, 250, 0.2) 0%, transparent 25%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.1) 0%, transparent 35%),
+                linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F8FAFC 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 装饰性背景光晕 */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-orb-top {
+            top: -10%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: rgba(96, 165, 250, 0.2);
+            filter: blur(120px);
+        }
+
+        .bg-orb-bottom {
+            bottom: -10%;
+            right: -10%;
+            width: 40%;
+            height: 40%;
+            background: rgba(99, 102, 241, 0.1);
+            filter: blur(120px);
+        }
+
+        /* 玻璃拟态头部 */
+        .glass-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* Logo 样式 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2563EB 0%, #6366F1 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .logo-icon-wrapper svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 状态指示器 */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #64748B;
+            background: rgba(241, 245, 249, 0.8);
+            padding: 6px 16px;
+            border-radius: 9999px;
+        }
+
+        .status-dot {
+            position: relative;
+            display: inline-flex;
+            width: 10px;
+            height: 10px;
+        }
+
+        .status-dot-inner {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+
+        .status-dot-ping {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: #34D399;
+            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+            opacity: 0.75;
+        }
+
+        @keyframes ping {
+
+            75%,
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .status-model {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-model svg {
+            width: 14px;
+            height: 14px;
+            color: #F59E0B;
+        }
+
+        /* 用户信息 */
+        .user-info-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            padding: 6px 16px 6px 6px;
+            border-radius: 9999px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: box-shadow var(--transition-fast);
+        }
+
+        .user-info-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-avatar-new {
+            width: 32px;
+            height: 32px;
+            background: #DBEAFE;
+            color: #1D4ED8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .user-name-new {
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .logout-icon {
+            width: 16px;
+            height: 16px;
+            color: #94A3B8;
+            margin-left: 8px;
+            transition: color var(--transition-fast);
+        }
+
+        .user-info-card:hover .logout-icon {
+            color: #EF4444;
+        }
+
+        /* 欢迎区域 */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 32px;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .welcome-subtitle {
+            color: #64748B;
+            font-size: 14px;
+        }
+
+        /* 主功能导航 */
+        .main-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px;
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #F1F5F9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            background: #F1F5F9;
+            color: #1E293B;
+        }
+
+        .nav-tab.active {
+            background: #2563EB;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .nav-tab svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: #E2E8F0;
+            margin: 0 4px;
+        }
+
+        /* 核心输入卡片 */
+        .input-card {
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #F1F5F9;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .input-card:focus-within {
+            box-shadow: 0 16px 40px -8px rgba(37, 99, 235, 0.15);
+            border-color: #BFDBFE;
+        }
+
+        .input-textarea {
+            width: 100%;
+            height: 180px;
+            resize: none;
+            background: transparent;
+            outline: none;
+            color: #334155;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 24px;
+            font-family: inherit;
+        }
+
+        .input-textarea::placeholder {
+            color: #94A3B8;
+        }
+
+        .char-counter {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-size: 12px;
+            color: #94A3B8;
+            font-family: monospace;
+        }
+
+        .input-card-body {
+            position: relative;
+            padding: 0;
+        }
+
+        /* 输入框底部操作栏 */
+        .input-footer {
+            background: rgba(241, 245, 249, 0.8);
+            padding: 14px 20px;
+            border-top: 1px solid #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 图标按钮 */
+        .icon-btn {
+            padding: 6px;
+            color: #64748B;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            color: #2563EB;
+            background: #EFF6FF;
+        }
+
+        .icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .icon-btn .tooltip {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1E293B;
+            color: white;
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .icon-btn:hover .tooltip {
+            opacity: 1;
+        }
+
+        .footer-divider {
+            width: 1px;
+            height: 18px;
+            background: #CBD5E1;
+        }
+
+        /* 模型选择器 */
+        .model-select-new {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .model-select-new:hover {
+            border-color: #93C5FD;
+        }
+
+        .model-select-new svg:first-child {
+            width: 13px;
+            height: 13px;
+            color: #2563EB;
+        }
+
+        .model-select-new svg:last-child {
+            width: 14px;
+            height: 14px;
+            color: #94A3B8;
+        }
+
+        /* 清空按钮 */
+        .clear-btn-new {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            font-size: 13px;
+            color: #64748B;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn-new:hover {
+            color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        .clear-btn-new svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* 提交按钮 */
+        .submit-btn-new {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 28px;
+            background: linear-gradient(135deg, #2563EB 0%, #6366F1 100%);
+            color: white;
+            font-weight: 500;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .submit-btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -6px rgba(37, 99, 235, 0.5);
+        }
+
+        .submit-btn-new:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn-new:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn-new svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .submit-btn-new:hover svg {
+            transform: translateX(3px);
+        }
+
+        /* 悬浮历史记录按钮 */
+        .history-float-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            color: #334155;
+            font-weight: 500;
+            border-radius: 9999px;
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 40;
+        }
+
+        .history-float-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 24px -8px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-float-btn svg {
+            width: 18px;
+            height: 18px;
+            color: #2563EB;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .main-nav {
+                flex-wrap: wrap;
+                gap: 4px;
+                padding: 4px;
+            }
+
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .nav-tab span {
+                display: none;
+            }
+
+            .nav-divider {
+                display: none;
+            }
+
+            .welcome-title {
+                font-size: 24px;
+            }
+
+            .input-footer {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .footer-left,
+            .footer-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .history-float-btn {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+            }
+        }
+
+        /* 容器调整 */
+        .app-container {
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: var(--spacing-lg);
+            overflow-y: auto;
+            padding: 0 16px 100px;
+            max-width: 5xl;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 头部调整 */
+        header {
+            padding: 16px 32px;
+        }
+
+        /* 步骤指示器和结果区域 */
+        .progress-section,
+        .result-section {
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-[#F8FAFC] font-sans text-slate-800 relative overflow-x-hidden flex flex-col">
+    <!-- 装饰性背景光晕 -->
+    <div
+        class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div
+        class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+
+    <!-- 顶部导航栏 - 玻璃拟态质感 -->
+    <header
+        class="sticky top-0 z-50 flex items-center justify-between px-8 py-4 bg-white/60 backdrop-blur-md border-b border-white/20 shadow-sm">
+        <!-- Logo 区域 -->
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            </div>
+            <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
+                Zenith Intelligence (极智学习)
+            </span>
+        </div>
+
+        <!-- 顶部状态与用户信息 -->
+        <div class="flex items-center gap-6">
+            <div
+                class="hidden md:flex items-center gap-4 text-xs font-medium text-slate-500 bg-slate-100/80 px-4 py-1.5 rounded-full">
+                <div class="flex items-center gap-1.5">
+                    <span class="relative flex h-2.5 w-2.5" id="backend-status-icon">
+                        <span id="backend-dot-ping"
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span id="backend-dot"
+                            class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span id="backend-status-text">网络</span>: <span id="backend-delay">21</span>ms
+                </div>
+                <div class="w-px h-3 bg-slate-300"></div>
+                <div class="flex items-center gap-1.5" id="model-status-container">
+                    <svg id="model-status-icon" class="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span id="model-status-text">模型就绪</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-white border border-slate-200 pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow transition-shadow cursor-pointer"
+                id="user-info-card">
+                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm"
+                    id="user-avatar-display">
+                    1
+                </div>
+                <span class="text-sm font-medium" id="user-name-display">123 User</span>
+                <svg id="logout-icon" class="w-4 h-4 text-slate-400 ml-2 hover:text-red-500 transition-colors" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体内容区 -->
+    <main class="flex-1 flex flex-col items-center justify-start px-4 max-w-5xl mx-auto w-full pb-20 mt-12 w-full">
+
+        <!-- 欢迎语 -->
+        <div class="text-center mb-10 w-full">
+            <h1 class="text-3xl font-bold text-slate-800 mb-3 tracking-tight">今天想学点什么？</h1>
+            <p class="text-slate-500 text-sm">拍照或输入题目，AI为您提供深度解析与引导。</p>
+        </div>
+
+        <!-- 主功能导航区 -->
+        <style type="text/tailwindcss">
+            @reference "tailwindcss";
+            .nav-tab-tailwind {
+                @apply flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 transition-all duration-200;
+            }
+            .nav-tab-tailwind:not(.active) {
+                @apply hover:bg-slate-100 hover:text-slate-900;
+            }
+            .nav-tab-tailwind.active {
+                @apply bg-blue-600 text-white shadow-md shadow-blue-500/25;
+            }
+            .nav-tab-tailwind svg {
+                width: 16px;
+                height: 16px;
+            }
+        </style>
+        <div
+            class="flex items-center justify-center gap-2 mb-8 bg-white/80 backdrop-blur p-1.5 rounded-2xl shadow-sm border border-slate-100">
+            <button class="nav-tab nav-tab-tailwind active" data-tab="智能解题">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                </svg>
+                智能解题
+            </button>
+            <button class="nav-tab nav-tab-tailwind" data-tab="课程中心">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+                课程中心
+            </button>
+            <button class="nav-tab nav-tab-tailwind" data-tab="编程助手">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                </svg>
+                编程助手
+            </button>
+            <button class="nav-tab nav-tab-tailwind" data-tab="学习统计">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+                学习统计
+            </button>
+            <div class="w-px h-6 bg-slate-200 mx-2"></div>
+            <button class="nav-tab nav-tab-tailwind" data-tab="个人中心">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                个人中心
+            </button>
+        </div>
+
+        <!-- 核心输入区域 -->
+        <div
+            class="w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all focus-within:shadow-2xl focus-within:shadow-blue-500/10 focus-within:border-blue-200">
+            <div class="relative p-6">
+                <textarea id="text-input"
+                    class="w-full h-48 resize-none bg-transparent outline-none text-slate-700 text-base placeholder-slate-400 leading-relaxed"
+                    placeholder="请输入题目内容，支持数学公式、化学方程式等...&#10;例如：求解一元二次方程 x² + 2x - 3 = 0" maxlength="2000"></textarea>
+
+                <div class="absolute top-4 right-6 text-xs text-slate-400 font-mono">
+                    <span id="char-count">0</span> / 2000
+                </div>
+            </div>
+
+            <div class="bg-slate-50/80 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <!-- 左侧工具 -->
+                <div class="flex items-center gap-4">
+                    <button
+                        class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors group relative"
+                        title="上传图片/截图" id="insert-image-btn">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                            <circle cx="9" cy="9" r="2" />
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                        </svg>
+                        <span
+                            class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">上传图片</span>
+                    </button>
+                    <input type="file" id="image-input" class="hidden" accept="image/jpeg,image/png,image/jpg">
+                    <!-- 图片预览区域 -->
+                    <div id="image-previews" class="flex flex-wrap gap-2 mt-1"></div>
+
+                    <div class="w-px h-5 bg-slate-300"></div>
+
+                    <!-- 模型选择器内嵌 -->
+                    <div class="relative">
+                        <button
+                            class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-300 rounded-lg text-sm text-slate-600 transition-colors shadow-sm"
+                            id="model-selector-btn">
+                            <svg class="w-3.5 h-3.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+                            </svg>
+                            <span id="selected-model-name">MiniMax-M2.7-highspeed</span>
+                            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+                        <!-- 下拉菜单容器 -->
+                        <div id="model-dropdown-menu"
+                            class="hidden absolute left-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
+                            <!-- 选项会由 JavaScript 动态生成 -->
+                        </div>
+                    </div>
+                    <!-- 隐藏的 select 用于数据绑定 -->
+                    <select id="model-provider" class="hidden"></select>
+                </div>
+
+                <!-- 右侧操作 -->
+                <div class="flex items-center gap-4">
+                    <button id="clear-text"
+                        class="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            <line x1="10" x2="10" y1="11" y2="17" />
+                            <line x1="14" x2="14" y1="11" y2="17" />
+                        </svg>
+                        清空
+                    </button>
+
+                    <button id="submit-btn" disabled
+                        class="group relative flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none">
+                        开始解答
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="m22 2-7 20-4-9-9-4Z" />
+                            <path d="M22 2 11 13" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤指示器 -->
+        <section class="progress-section" id="progress-section" style="display: none;">
+            <div class="progress-steps">
+                <div class="step" data-step="1">
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                    </div>
+                    <span class="step-label">识别题目</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step" data-step="2">
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                    </div>
+                    <span class="step-label">解析分析</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step" data-step="3">
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                    </div>
+                    <span class="step-label">生成解答</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果展示区域 -->
+        <section class="result-section" id="result-section" style="display: none;">
+            <h2 class="sr-only">解题结果</h2>
+
+            <div class="result-card" id="recognition-card">
+                <div class="card-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        题目识别
+                    </h3>
+                    <button class="toggle-btn" data-target="recognition-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-content" id="recognition-content">
+                    <div class="recognized-text" id="recognized-text"></div>
+                    <button class="edit-btn" id="edit-recognition">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        编辑
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-card" id="parse-card">
+                <div class="card-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                        题目解析
+                    </h3>
+                    <button class="toggle-btn" data-target="parse-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-content" id="parse-content">
+                    <div class="parse-result" id="parse-result">
+                        <div class="parse-item">
+                            <span class="parse-label">题目类型</span>
+                            <span class="parse-value" id="parse-type">-</span>
+                        </div>
+                        <div class="parse-item">
+                            <span class="parse-label">所属学科</span>
+                            <span class="parse-value" id="parse-subject">-</span>
+                        </div>
+                        <div class="parse-item">
+                            <span class="parse-label">知识点</span>
+                            <div class="parse-tags" id="parse-knowledge"></div>
+                        </div>
+                        <div class="parse-item">
+                            <span class="parse-label">难度等级</span>
+                            <span class="parse-value difficulty" id="parse-difficulty">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card" id="solution-card">
+                <div class="card-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                        详细解答
+                    </h3>
+                    <button class="toggle-btn" data-target="solution-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-content" id="solution-content">
+                    <div class="solution-content" id="solution-content-inner">
+                        <div class="solution-section">
+                            <h4>解题思路</h4>
+                            <div class="solution-thinking" id="solution-thinking"></div>
+                        </div>
+                        <div class="solution-section">
+                            <h4>详细步骤</h4>
+                            <div class="solution-steps" id="solution-steps"></div>
+                        </div>
+                        <div class="solution-section">
+                            <h4>最终答案</h4>
+                            <div class="solution-answer" id="solution-answer"></div>
+                        </div>
+                        <div class="solution-section">
+                            <h4>知识总结</h4>
+                            <div class="solution-summary" id="solution-summary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 悬浮的历史记录按钮 -->
+    <button id="history-btn"
+        class="fixed bottom-8 right-8 flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 text-slate-700 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all font-medium z-40">
+        <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+        </svg>
+        历史记录
+    </button>
+
+    <!-- 历史记录侧边栏 -->
+    <aside class="history-sidebar" id="history-sidebar">
+        <div class="history-header">
+            <h2>历史记录</h2>
+            <button class="close-history" id="close-history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="history-list" id="history-list">
+        </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>处理中，请稍候...</p>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+    <script src="js/user.js?v=3"></script>
+    <script src="js/main.js?v=3"></script>
+
+    <script>
+        // 导航标签页切换
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const tabName = this.getAttribute('data-tab');
+                if (!tabName) return;
+
+                // 更新激活状态
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // 导航到对应页面
+                const pageMap = {
+                    '智能解题': 'app.html',
+                    '课程中心': 'courses.html',
+                    '编程助手': 'programming.html',
+                    '学习统计': 'stats.html',
+                    '个人中心': 'profile.html'
+                };
+
+                if (pageMap[tabName] && window.location.pathname.indexOf(pageMap[tabName]) === -1) {
+                    window.location.href = pageMap[tabName];
+                }
+            });
+        });
+
+        // 字数统计
+        const textInput = document.getElementById('text-input');
+        const charCount = document.getElementById('char-count');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (textInput && charCount && submitBtn) {
+            textInput.addEventListener('input', function () {
+                const count = this.value.length;
+                charCount.textContent = count;
+                submitBtn.disabled = count === 0;
+            });
+        }
+
+        // 设置当前激活的标签页
+        const pathParts = window.location.pathname.split('/');
+        const currentPage = pathParts[pathParts.length - 1] || 'app.html';
+        const tabMap = {
+            'app.html': '智能解题',
+            'courses.html': '课程中心',
+            'programming.html': '编程助手',
+            'stats.html': '学习统计',
+            'profile.html': '个人中心'
+        };
+
+        const activeTabName = tabMap[currentPage];
+        if (activeTabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                if (tab.getAttribute('data-tab') === activeTabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
