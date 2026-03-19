@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// 在 Zeabur 原生部署中，我们将通过配置 VITE_API_BASE_URL 环境变量注入后端地址
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+function isLocalhost() {
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (isLocalhost() ? 'http://localhost:5001' : '/api');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

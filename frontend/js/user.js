@@ -11,8 +11,15 @@ function isLocalhost() {
 }
 
 function buildApiBases() {
-    // 总是优先尝试连接到后端服务器
-    return [DEV_FALLBACK_API_BASE, API_BASE];
+    if (typeof window !== 'undefined' && window.__env__ && window.__env__.VITE_API_BASE_URL) {
+        return [window.__env__.VITE_API_BASE_URL];
+    }
+
+    if (isLocalhost()) {
+        return [DEV_FALLBACK_API_BASE, API_BASE];
+    }
+
+    return [API_BASE];
 }
 
 function makeApiUrl(base, path) {
@@ -118,28 +125,33 @@ const UserManager = {
      * 统一 API 请求：支持注入的环境变量或开发环境
      */
     async fetchApi(path, options = {}) {
-        // 在传统前后端分离架构中，前端页面不再和后端使用同一个域名
-        // 生产环境应通过 Vite 注入的全局变量 (如果可用) 或绝对路径来访问后端
-        let baseUrl = 'http://localhost:5001';
-        
-        // 如果存在全局的 VITE_API_BASE_URL (通常由构建系统注入)，则使用它
-        if (typeof window !== 'undefined' && window.__env__ && window.__env__.VITE_API_BASE_URL) {
-            baseUrl = window.__env__.VITE_API_BASE_URL;
-        }
-
-        const url = `${baseUrl}${path}`;
-
         // 自动附加 Authentication headers
         const headers = { ...this.getHeaders(), ...(options.headers || {}) };
         const fetchOptions = { ...options, headers };
 
-        try {
-            const response = await fetch(url, fetchOptions);
-            return response;
-        } catch (error) {
-            console.error('API 请求失败:', error);
-            throw new Error('后端服务不可用');
+        let lastError = null;
+
+        for (const baseUrl of buildApiBases()) {
+            const url = makeApiUrl(baseUrl, path);
+
+            try {
+                const response = await fetch(url, fetchOptions);
+
+                if (shouldFallbackToDevBackend(response)) {
+                    continue;
+                }
+
+                return response;
+            } catch (error) {
+                lastError = error;
+                if (!isLocalhost() || baseUrl === DEV_FALLBACK_API_BASE) {
+                    break;
+                }
+            }
         }
+
+        console.error('API 请求失败:', lastError);
+        throw new Error('后端服务不可用');
     },
 
     /**
